@@ -58,7 +58,7 @@ These dashboards enable users to quickly turn data into shareable, impactful sto
 
 For this lab, you will:
 
-* Add the `airports_silver_mv`, `lookupcodes_silver_mv`, `flights_silver_mv` and the `airports_by_city_mv` views directly
+* Add the taxi tables and views directly
 
 > **Note:** In a production environment, it’s best to build dashboards on clean Silver or Gold layer data.
 
