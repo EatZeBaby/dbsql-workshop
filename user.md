@@ -80,7 +80,14 @@ For this lab, you will:
 
 Feel free to continue playing around with the different visualizations that you can create using natural language or building them manually yourself.
 ****
+## Link to Day 1 Questions
+Create visualizations that answers yesterdays questions
+- Which zones had the highest yearly revenue? (Top 5)
+- Are there any zones with unusual revenue fluctuations?
+- Do trip counts correlate with revenue per zone? (Yes/No)
 
+Example of a dashboard
+![](/Volumes/main_hec_nov_2025/axel_richier/raw/Screenshot 2025-11-14 at 00.15.25.png)
 ### Step 1b: Adding Filters
 8. AI/BI dashboards also support text widgets using markdown. Add a text widget to your dashboard and title it "Yellow Taxi Data Dashboard"
 9. Filters are dashboard widgets that help viewers narrow down results and refine data in visualizations. To add a filter, click the filter button on the blue bar and drag and drop it to an area on your canvas.
@@ -213,6 +220,23 @@ On the left you can see different icons.
 4. You can click "show generated code" to see the underlying SQL code that Genie leveraged to create a response. You can optionally edit it directly if you are a SQL expert and understand the code.
 5. Open instructions tab and see the example queries section with where you can add sample queries for Genie to reuse. 
 7. Genie can even create quick visualizations for you to better understand your insights. Let's ask genie: "Now graph this as a bar chart sorted most to least trips"
+
+## Test Day 1 Questions:
+Again, let's try to answers these question with Genie :
+
+
+## Link to Day 1 Questions
+Create visualizations that answers yesterdays questions
+- Which zones had the highest yearly revenue? (Top 5)
+- Are there any zones with unusual revenue fluctuations?
+- Do trip counts correlate with revenue per zone? (Yes/No)
+
+Now, you can see how powerful Genie can be when you compare how we retrieved this answers :
+1- From an exploratory notebook, without Data Quality Guaranty
+2- From a dashboard, hoping that there is actually a chart that answers the data, and needs you to interpret it.
+3- From just a natural question, in a matter of seconds.
+
+![](/Volumes/main_hec_nov_2025/axel_richier/raw/Screenshot 2025-11-14 at 00.20.14.png)
 
 ### Step 4: Share Genie
 Now that your Genie space has been created and you have tested it by chatting and teaching Genie, it is now time to share Genie with the rest of your team
