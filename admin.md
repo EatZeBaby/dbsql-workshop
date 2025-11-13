@@ -74,12 +74,11 @@ The interface emphasizes user-friendly navigation, allowing data engineers, data
 
 As the admin of a Databricks workspace, you are responsible for configuring and monitoring SQL Warehouses. These are the compute resources that execute SQL queries within Databricks SQL.
 
-Follow these steps to inspect or create a SQL Warehouse:
+Follow these steps to inspect a SQL Warehouse (you don't need to create one for this workshop):
 
-1. From the left-hand navigation pane, click on **SQL Warehouses**
-2. You may see a pre-configured SQL Warehouse that is already running. If it is not, click the **play icon** to start it
+1. From the left-hand navigation pane, click on **[SQL Warehouses](/compute/sql-warehouses)**
+2. You should see a pre-configured SQL Warehouse called _Serverless Starter Warehouse_ and one called _hec_x_warehouse_. If it is not running, click the **play icon** to start it
 3. Click on the warehouse name to review its configuration. You may not be able to edit it in this lab, and that's okay, your instructor will demonstrate these steps
-4. If you have permission to edit or create a warehouse, click **Edit** or **Create Warehouse** and configure the following settings:
 
 ### SQL Warehouse Settings Explained
 
@@ -122,69 +121,14 @@ The **Monitoring** tab helps you:
 
 Now that your SQL Warehouse (compute layer) is configured, you're ready to start ingesting and managing data in your lakehouse!
 
-## Step 1: Create a Catalog and Catalog Name
+## Step 1 : Select a Catalog 
 
 In Unity Catalog, a **catalog** is the topmost container in the data governance hierarchy. It’s used to logically organize your data across workspaces and manage access control. Catalogs hold schemas, which in turn contain tables, views, functions, and volumes.
 
-In this step, we’ll create a catalog using SQL commands in the Databricks SQL Editor. This is a common administrative task, typically performed by data stewards, administrators, or architects to structure how data is grouped and governed.
+In this step, we have already created the *dbsql_hec_nov_2025* catalog in advance. This is a common administrative task, typically performed by data stewards, administrators, or architects to structure how data is grouped and governed, and ideally programmatically with tools like [Terraform](https://registry.terraform.io/providers/databricks/databricks/latest/docs/resources/catalog).
 
 > **Note:** In a real-world workspace, you can also create a catalog using the **Catalog Explorer** UI. If you’d like to explore that method, visit the [official Databricks documentation](https://docs.databricks.com/en/catalogs/create-catalog.html#create-a-catalog).
 
-### What You'll Learn
-
-* What a catalog is and why it’s essential in Unity Catalog
-* How to dynamically generate a catalog name based on your username
-* How to create a catalog using SQL
-
-### Instructions
-
-1. Open the SQL Editor, and toggle on the New SQL Editor
-2. Create a new query and **title it "Create Catalog"**
-3. Copy and paste the SQL code below
-4. Click **Save** to store your query
-
-### Code to Dynamically Create a Catalog Name
-
-```sql
--- 1. Retrieve the current user and extract the part before '@'
-WITH current_user_info AS (
-  SELECT
-    CASE
-      WHEN POSITION('@' IN current_user()) > 0 THEN SUBSTRING(current_user(), 1, POSITION('@' IN current_user()) - 1)
-      ELSE current_user()
-    END AS current_user_no_at
-),
-
--- 2. Replace non-word characters with '_'
-sanitized_user AS (
-  SELECT
-    REGEXP_REPLACE(current_user_no_at, '\\W+', '_') AS sanitized_username
-  FROM current_user_info
-),
-
--- 3. Construct the catalog name
-catalog_name AS (
-  SELECT
-    CONCAT('dbsql_demo_', sanitized_username) AS catalogName
-  FROM sanitized_user
-)
-
--- 4. Display the resulting catalog name
-SELECT * FROM catalog_name;
-```
-
-> **Note:** This SQL query helps generate a personalized catalog name using your Databricks username, which is useful in shared environments. Even if you do not have permission to run this in the workshop, it’s important to understand how it works.
-
-### Create the Catalog
-
-1. Once you’ve generated your personalized catalog name, under the code where you created the catalog name, copy and paste the code below
-2. Replace <catalog> in the command below with the name returned above
-3. Run just the code below 
-4. Save the query again
-
-```sql
-CREATE CATALOG IF NOT EXISTS <catalog>;
-```
 
 ### Best Practices for Naming Catalogs in a Real-World Situation
 
@@ -192,7 +136,7 @@ CREATE CATALOG IF NOT EXISTS <catalog>;
 * Avoid special characters or spaces
 * Ensure names are aligned with data domain or department ownership
 
-Once the catalog is created, you can confirm in the catalog explorer. Now, we’ll move to the next layer—schemas (or databases), which live inside the catalog and further organize your data assets.
+Now, we’ll move to the next layer—schemas (or databases), which live inside the catalog and further organize your data assets.
 
 ## Step 2: Create a Schema and Schema Name
 
@@ -210,7 +154,7 @@ In this step, you'll create a schema using SQL commands in the [Databricks SQL E
 
 ### Why Use Dynamic Schema Names?
 
-Just like with catalog names, generating schema names dynamically based on your username ensures that each participant in this lab has a **unique and isolated environment**. This avoids conflicts and makes the lab experience smoother for all users.
+Generating schema names **dynamically** based on your username ensures that each participant in this lab has a **unique and isolated environment**. This avoids conflicts and makes the lab experience smoother for all users.
 
 ### Instructions
 
@@ -241,7 +185,7 @@ sanitized_user AS (
 -- 3. Construct the schema name
 db_name AS (
   SELECT
-    CONCAT('airlinedata_', sanitized_username) AS dbName
+    CONCAT('taxi_', sanitized_username) AS dbName
   FROM sanitized_user
 )
 
@@ -259,36 +203,20 @@ SELECT dbName FROM db_name;
 
 ```sql
 -- 1. Create Schema
-CREATE SCHEMA IF NOT EXISTS <schema>;
+CREATE SCHEMA IF NOT EXISTS <paste_schema_here>;
 ```
 
 Confirm that your schema has been created by checking the catalog explorer. With your catalog and schema now established, you're ready to start creating storage containers and loading data!
 
-### Step 3: Create A Volume
+### Step 3: Volumes
 ### 
 In Unity Catalog, a **volume** is designed to provide governance over **non-tabular datasets**, such as raw files in structured, semi-structured, or unstructured formats. Volumes act as logical containers for data stored in underlying cloud object storage like AWS S3 or Azure Blob Storage.
 
 > **Important Context for This Lab:**
-> In a real-world production environment, customers typically ingest or stream data into Databricks from their own cloud storage (e.g., S3 buckets or ADLS). However, to simplify setup and ensure consistent access for all participants, especially since not all users have cloud credentials or admin privileges, we will **create a volume** that you’ll use in the next part of this workshop.
-
-1. Click each of these and download all three files [airports.csv](https://github.com/thatgirlpearl01/data-warehousing/blob/main/airports.csv), [flights.csv](https://github.com/thatgirlpearl01/data-warehousing/releases/tag/flights) and [lookupcodes.csv](https://github.com/thatgirlpearl01/data-warehousing/blob/main/lookupcodes.csv) to your computer. Note: right click and open a new tab to get the files to avoid losing your github window
-
-2. Then create a volume in the schema you created and title it **raw_airline_files**
-
-3. Within that volume called **raw_airline_files** please create a directory called flights, a directory called airports and a directory called lookupcodes
-
-4. Lastly, upload your three CSV files to each directory you created. (e.g. flights.csv to flights directory; airports.csv to airports directory; and lookupcodes.csv to lookupcodes directory)
-
-You can create regular delta tables from the files in your volume, but for this workshop, I want you to learn about how you can use SQL to extract, transform and load your data from files using streaming tables and materialized views. Let's begin!
+> In a real-world production environment, customers typically ingest or stream data into Databricks from their own cloud storage (e.g., S3 buckets or ADLS).  
 
 > **Important Limitation:** You **cannot** use volumes as a location for tables. Volumes are intended for **path-based data access only**. If you want to work with tabular data using Unity Catalog’s capabilities, you should use **tables** instead. We will convert these files
-
-### What You'll Learn
-
-* What volumes are used for in Unity Catalog
-* The types of data volumes can support
-* Why volumes are different from tables
-* How to navigate to a pre-configured volume and upload files
+ 
 
 ### Volume Purpose Recap
 
@@ -298,13 +226,8 @@ Volumes are often used to:
 * Manage data access and auditing using Unity Catalog’s governance features
 * Serve as landing zones for unstructured or semi-structured files before transformation
 
-### Summary
 
-Now that the data files are uploaded into your volume, you’ll be able to reference them in future steps as you build streaming tables, materialized views, and more.
-
-Let’s begin working with these files to extract, transform, and load your data using SQL!
-
-## Step 4: Create Streaming Tables
+## Step 3: Create Streaming Tables
 
 [Streaming tables](https://docs.databricks.com/en/sql/language-manual/sql-ref-syntax-ddl-create-streaming-table.html#create-streaming-table) are stateful tables designed to continuously ingest and process new data. Because many datasets grow over time, streaming tables are ideal for real-time or near-real-time ingestion use cases.
 
@@ -332,29 +255,43 @@ We’ll start by creating Bronze streaming tables using the CSVs in your volume.
 4. In the SQL editor, there is a catalog and schema selector. Go ahead and set it to the catalog and the schema that you created
 5. Run each snippet of code 1 at a time?
 
-### Streaming Table: Airports
+### Streaming Table: Raw Taxi
+Here are queries from yesterday to recreate the tables in case you missed it.
 
 ```sql
--- Create airports streaming table
-CREATE OR REFRESH STREAMING TABLE airports_bronze_st AS
-SELECT * FROM STREAM read_files('/Volumes/<catalog>/<schema>/raw_airline_files/airports');
+CREATE OR REFRESH STREAMING TABLE taxi_bronze_dbsql
+TBLPROPERTIES ('delta.feature.timestampNtz' = 'supported')
+AS
+SELECT *
+FROM STREAM read_files(
+  '/Volumes/main_hec_nov_2025/axel_richier/raw/taxi/',
+  format => 'parquet'
+);
+
 ```
 
-### Streaming Table: Flights
-
+### Streaming Table: Taxi Zone Lookups
+Use this exact query to get the lookup zones.
 ```sql
--- create flights streaming table
-CREATE OR REFRESH STREAMING TABLE flights_bronze_st AS
-SELECT * FROM STREAM read_files('/Volumes/<catalog>/<schema>/raw_airline_files/flights');
-```
+CREATE OR REFRESH MATERIALIZED VIEW taxi_lookup_zones 
+(
+  LocationID int,
+  Borough string,
+  Zone string,
+  service_zone string,
+  _rescued_data string ,
+  CONSTRAINT pk_lookupcodes PRIMARY KEY (LocationID)
+)
+AS
 
-### Streaming Table: Lookupcodes
+SELECT * FROM read_files(
+  '/Volumes/main_hec_nov_2025/axel_richier/raw/taxi_zone_lookup/taxi_zone_lookup.csv',
+  format => 'csv',
+  header => true
+);
 
-```sql
--- create lookup codes streaming table
-CREATE OR REFRESH STREAMING TABLE lookupcodes_bronze_st AS
-SELECT * FROM STREAM read_files('/Volumes/<catalog>/<schema>/raw_airline_files/lookupcodes');
 ```
+ 
 
 Once these tables are created, you’ll have foundational raw data to begin cleansing and transforming in the next steps of the lab.
 
@@ -368,7 +305,7 @@ Databricks supports a variety of ingestion methods depending on your use case an
 * **SQL Editor or Notebooks**: Manual or scheduled ingestion using SQL or Python
 * **Auto Loader**: Efficient, scalable ingestion of new files from cloud storage with minimal setup
 * **COPY INTO**: Ideal for SQL users needing idempotent and incremental ingestion from cloud storage
-* **Delta Live Tables (DLT)**: Declarative pipelines with built-in monitoring and data quality checks
+* **Lakeflow Spark Declarative Pipelines (LSDP)**: Declarative pipelines with built-in monitoring and data quality checks
 * **LakeFlow Connect**: Fully managed connectors for enterprise applications, cloud storage, and databases
 * **Structured Streaming**: Real-time ingestion from sources like Kafka or Kinesis
 
@@ -396,16 +333,21 @@ In this step, we’ll create views for the **Silver** and **Gold** layers of the
 3. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created
 
 ```sql
-
-CREATE OR REPLACE MATERIALIZED VIEW airports_silver_mv
-(
-  IATA STRING,
-  City STRING,
-  State STRING,
-  CONSTRAINT pk_airports PRIMARY KEY (IATA)
-) AS
-SELECT IATA, City, State
-FROM airports_bronze_st;
+CREATE OR REPLACE MATERIALIZED VIEW taxi_daily_zone_summary
+AS
+SELECT to_date(tpep_pickup_datetime) as pickup_date
+    ,count(*) nb_trip
+    ,sum(fare_amount) as revenue
+    ,sum(tip_amount) as tip_amount
+    ,PULocationID 
+    ,avg(passenger_count) avg_passenger_count
+    ,avg(trip_distance) avg_trip_distance
+    ,sum(fare_amount) as total_fare_amount
+    ,z.Borough, z.Zone, z.service_zone 
+from taxi_bronze_dbsql t 
+left join taxi_lookup_zones z on t.PULocationID = z.LocationID
+group by pickup_date, PULocationID, z.Borough, z.Zone, z.service_zone
+;
 ```
 
 This view extracts and cleans specific columns from the Bronze layer for analysis while incorporating some data modeling with the addition of a primary key
@@ -602,6 +544,6 @@ At this stage, you have:
 
 This foundational work prepares your environment for efficient collaboration, governance, and analytics. Your workspace users now have the structure, data, and permissions they need to begin their own analysis.
 
-Now, it's time to shift perspectives and see how the [**User POV**](https://github.com/thatgirlpearl01/data-warehousing/edit/main/user.md) interacts with the system you just set up.
+Now, it's time to shift perspectives and see how the [**User POV**](./user.md) interacts with the system you just set up.
 
 Let’s move on!
