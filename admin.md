@@ -326,10 +326,10 @@ In this step, we’ll create views for the **Silver** and **Gold** layers of the
 
 ---
 
-### Materialized View: Airports Silver Layer
+### Materialized View: Taxi Summary
 
 1. **Open the SQL Editor**.
-2. **Create a new query** and name it `Airports Silver_MV`.
+2. **Create a new query** and name it `Taxi Silver_MV`.
 3. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created
 
 ```sql
@@ -352,97 +352,34 @@ group by pickup_date, PULocationID, z.Borough, z.Zone, z.service_zone
 
 This view extracts and cleans specific columns from the Bronze layer for analysis while incorporating some data modeling with the addition of a primary key
 
+--- 
 ---
 
-### Materialized View: Lookupcodes Silver Layer
+### Metric Views
+[Metric Views](https://docs.databricks.com/aws/en/metric-views) are Unity Catalog objects designed to simplify access to data by abstracting the complexity of underlying data structures and the SQL syntax required for querying.
 
-1. **Create a new query** and name it `Lookupcodes Silver_MV`.
-2. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created
-
-```sql
-
-CREATE OR REPLACE MATERIALIZED VIEW lookupcodes_silver_mv
-(
-  UniqueCode STRING,
-  Description STRING,
-  CONSTRAINT pk_lookupcodes PRIMARY KEY (UniqueCode)
-) AS
-SELECT UniqueCode, Description 
-FROM lookupcodes_bronze_st
-WHERE UniqueCode IS NOT NULL AND Description IS NOT NULL;
-```
-
-This view filters out rows with null values to ensure reliable lookup data while incorporating some data modeling with the addition of a primary key
-
----
-
-### Materialized View: Flights Silver Layer
-
-1. **Create a new query** and name it `Flights Silver_MV`.
-2. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created
-
-```sql
-
-CREATE OR REPLACE MATERIALIZED VIEW flights_silver_mv
-(
-  FlightNum,
-  Origin,
-  Dest,
-  Year,
-  Month,
-  DayofWeek,
-  Date,
-  UniqueCarrier,
-  TailNum,
-  DepTime,
-  ArrTime,
-  ActualElapsedTime,
-  Distance,
-  IsArrDelayed,
-  IsDepDelayed,
-  CONSTRAINT fk_flights_unique_carrier FOREIGN KEY (UniqueCarrier) REFERENCES dbsql_demo_pearl_ubaru.airlinedata_pearl_ubaru.lookupcodes_silver_mv(UniqueCode)
-) AS
-SELECT 
-  FlightNum, 
-  Origin, 
-  Dest, 
-  Year, 
-  Month, 
-  DayofWeek, 
-  Date, 
-  UniqueCarrier, 
-  TailNum, 
-  DepTime, 
-  ArrTime, 
-  ActualElapsedTime, 
-  Distance, 
-  IsArrDelayed, 
-  IsDepDelayed
-FROM flights_bronze_st
-WHERE FlightNum IS NOT NULL;
-```
-
-This view prepares cleansed flight data for reporting and trend analysis, while incorporating some data modeling with the addition of a foreign key
-
----
+## Why Metric Views ?
+![](https://docs.databricks.com/aws/en/assets/images/what-is-e47897bcd7c9a7a16b119c3b1857ee42.png)
+Metric views are valuable for end users because they make business metrics consistent, flexible, and easy to access, improving trust and efficiency across all reporting and analytics workflows.
 
 
-### Materialized View: Airports Gold Layer
+### Benefits
+* **Single Source of Truth for Metrics**: Metric views centralize the definition of key business measures (like KPIs), so that everyone uses the same logic and calculation across dashboards, reports, SQL queries, and AI/BI tools. This removes silos and inconsistencies that happen when metric logic is duplicated in many places. 
+ 
 
-1. **Create a new query** and name it `Airports Gold_MV`.
-2. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created.
+* **Flexible, Reusable Analysis**: Unlike standard views, metric views separate the metric calculation from how you group or filter data. End users can slice and dice metrics by any available dimension—such as grouping revenue by state, region, or country—without needing separate views or complex precomputed tables. The platform automatically generates the correct SQL for each grouping, making ad hoc analysis much easier. 
+ 
+* **Discoverable and Auditable**: Users can search and browse metrics in Catalog Explorer, see full metric definitions (measures, dimensions, filters), view lineage, and audit who used each metric. Insights tabs show which users and dashboards access which metrics most frequently. 
+ 
+ 
+* **Integration Across All Tools**: Metric views are accessible not just through SQL, but also via AI assistants, dashboards, and Genie spaces—making trusted, governed metrics available everywhere users work. 
+ 
 
-```sql
+## Create a metric view
+Select your raw taxi_bronze table in the Unity Catalog and in the top right, click on "Create" and selet "Metric View". The Assistant will analyze your dataset and will provide example of Metric view. 
+Have a look through the generated code and click on "Create"
 
-CREATE OR REPLACE MATERIALIZED VIEW airports_by_city_mv AS
-SELECT City, COUNT(*) AS number_of_airports
-FROM airports_silver_mv
-GROUP BY City;
-```
 
-This Gold layer view provides an aggregated, business-friendly summary by city.
-
----
 
 Once these views are created, you’ll be ready to explore your cleansed and transformed data in the next steps of the lab.
 
@@ -486,8 +423,8 @@ Databricks uses a large language model (LLM) to generate these comments based on
 1. Go to the Catalog Explorer tab in the left-hand navigation pane.
 2. Navigate to your `<catalog>` and click the **Description**. Then click Generate Comments. This will auto-generate a description for the catalog.
 3. Navigate into your `<schema>` and repeat the process by clicking the **Description** button to add a schema-level description.
-4. Locate your `flights_bronze_st` table, view the AI Suggested Description and then click the **Accept** button to generate a table description.
-5. Above the column headers of `flights_bronze_st`, click the **AI Generate** button again to generate column-level descriptions.
+4. Locate your `taxi_daily_zone_summary` table, view the AI Suggested Description and then click the **Accept** button to generate a table description.
+5. Above the column headers of `taxi_daily_zone_summary`, click the **AI Generate** button again to generate column-level descriptions.
 6. Repeat this for all of your newly created streaming tables and views
 
 > **Note:** You can manually edit or override AI-generated comments at any time.
