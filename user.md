@@ -65,40 +65,40 @@ For this lab, you will:
 ### Step 1a: Creating Visualizations
 4. Back in the canvas, to make a visualization, click the chart button in the blue bar at the bottom. Drag and drop your chart in any area of choice
 5. Before you take advantage of the text-to-viz feature, make sure that your dataset is set to flights_silver_mv
-6. Then type "Count of Flight Delays". Click accept.
-6b. Then create another viz by typing "flight delay by day of week". You can edit the bar chart using the right hand navigation pane by:
+6. Then type "Count of Taxi trips". Click accept.
+6b. Then create another viz by typing "taxi trips by day of week". You can edit the bar chart using the right hand navigation pane by:
 - adding a description to the bar chart
 - changing the visualization type
 - editing the groupby colors and labels
 
 7. You can also create your own visualizations manually using the right hand-navigation pane
-- select dataset flights_silver_mv
+- select dataset taxi_daily_zone_summary
 - select pie visualization type
-- title as Count of Arrival Delays
+- title as Count of nb trip
 - Angle is count(*)
-- Color/Group by isArrDelayed 
+- Color/Group by Borough 
 
 Feel free to continue playing around with the different visualizations that you can create using natural language or building them manually yourself.
 ****
 
 ### Step 1b: Adding Filters
-8. AI/BI dashboards also support text widgets using markdown. Add a text widget to your dashboard and title it "Flight Data Dashboard"
+8. AI/BI dashboards also support text widgets using markdown. Add a text widget to your dashboard and title it "Yellow Taxi Data Dashboard"
 9. Filters are dashboard widgets that help viewers narrow down results and refine data in visualizations. To add a filter, click the filter button on the blue bar and drag and drop it to an area on your canvas.
-10. Select the type of filter as date picker and the field should be flights_silver_mv.date
-11. Test out the filter by selecting July 4, 2007 as a date
+10. Select the type of filter as date picker and the field should be a date or timestamp
+11. Test out the filter by selecting a date or a date range
 
 ### Step 1c: Adding Parameters
 Unlike field filters, which directly filter data fields, parameter filters alter the SQL query itself. A filter can be applied to one or more parameters, and parameters must be added to datasets first
 
-12. Go to the data tab and clone another flights_silver_mv as your data set and rename it it flights_silver_parameters
+12. Go to the data tab and clone another taxi_daily_zone_summary as your data set and rename it to daily_taxi_parameters
 13. Remove the semicolon at the end of the SQL statements and add a where clause and then description =
 ```sql
 SELECT * 
-FROM flights_silver_mv 
-WHERE dest = :parameter
+FROM taxi_daily_zone_summary 
+WHERE Borough = :parameter
 ```
 14. Then click the add parameter button, click the gear button and change the display name to destination and the parameter Type to string
-15. Type BOS in the parameter box to make sure it works and run the query again
+15. Type Manhattan in the parameter box to make sure it works and run the query again
 
 ## Step 1d: Filtering on Parameters
 
@@ -110,10 +110,10 @@ Dashboards become much more powerful and user-friendly when they allow interacti
 2. Click the **Add Filter** button on the blue toolbar.
 3. Drag and drop the filter widget onto the canvas near your visualizations.
 4. Set the filter type to **Single Value**.
-5. For the data source, choose your `flights_silver_mv` table.
+5. For the data source, choose your `taxi_daily_zone_summary` table.
 6. For the filter field, select **Destination**.
 7. Under the **Parameters** section, link this filter to the parameter you previously created. It should be named `flights_silver_parameters.destination`.
-8. Enter a destination airport code in the filter box (e.g., `BOS`, `JFK`, `LAX`) and watch your dashboard dynamically update based on the selection.
+8. Enter a Borough in the filter box (e.g., `Bronk`, `Queens`, `Manhattan`) and watch your dashboard dynamically update based on the selection.
 
 ---
 
@@ -143,7 +143,7 @@ When you publish a dashboard, you can choose to embed your credentials or not:
 
 For this workshop we will:
 
-1. Give the dashboard a title: **Flight Data Dashboard**
+1. Give the dashboard a title: **Taxi Data Dashboard**
 2. Embed the credentials
 3. Click **Publish**
 
@@ -180,10 +180,10 @@ AI/BI Genie is a no-code interface powered by AI with data intelligence that all
 
 1. You can create a Genie from a table in the catalog explorer, from the Genie listing page or from a dashboard. For this workshop we will create a Genie the Genie listing page
 2. Click on Genie on the left hand navigation pane and click new
-3. Give the Genie the title "Flight Data Genie"
-4. Description should say "for users to understand and gather insights on flight data from the year 2007 to 2024"
-5. Select your warehouse. Genie works only on a serverless or pro warehouse
-6. Add your tables (lookupcodes_silver_mv, airports_silver_mv and flights_silver_mv)
+3. Give the Genie the title "Taxi Data Genie"
+4. Description should say "for users to understand and gather insights on taxi data from the year 2025"
+5. Select a warehouse.  
+6. Add your tables 
   - **Note:** Layer views to reduce the number of columns and add use-case-specific information to increase response quality; and only bring in the tables and columns needed to answer questions for a given domain
 7. You can optionally add sample questions that you know other users are bound to ask consistently... 
 
@@ -208,13 +208,11 @@ On the left you can see different icons.
 ### Step 3a: Chatting with Genie
 
 1. Click on "explain the dataset"
-2. Genie quickly responds. Now ask "Which airlines are delayed the most? Give me the top 5 by average delay"
-3. Genie gives you an appropriate answer but the unique carrier does not tell us much about the airline name 
+2. Genie quickly responds. Now ask "Which zones have the most trip in september? Give me the top 3 by average nb of trips"
+3. Genie should give you an appropriate answer 
 4. You can click "show generated code" to see the underlying SQL code that Genie leveraged to create a response. You can optionally edit it directly if you are a SQL expert and understand the code.
-5. For this lab we can show the magic of Genie by just asking it to "Now join this up with the lookup code table to give me the actual airline name"
-6. Perfect! We can add this as an instruction so that in the future, if other users ask a similar question, Genie will remember and leverage the SQL code.
-7. Open instructions tab and see the example queries section with our newly added query
-7. Genie can even create quick visualizations for you to better understand your insights. Let's ask genie: "Now graph this as a bar chart sorted most to least delayed"
+5. Open instructions tab and see the example queries section with where you can add sample queries for Genie to reuse. 
+7. Genie can even create quick visualizations for you to better understand your insights. Let's ask genie: "Now graph this as a bar chart sorted most to least trips"
 
 ### Step 4: Share Genie
 Now that your Genie space has been created and you have tested it by chatting and teaching Genie, it is now time to share Genie with the rest of your team
@@ -257,44 +255,23 @@ Let’s walk through how to create a benchmark:
 2. Click the **Questions** tab, then select **Add Benchmark**
 3. In the question field, enter:
 
-   > "How many flights from Boston were delayed in March 2007?"
+   > "How many taxi trips in the Queens borough on July 14th ?"
 4. Below is the correct SQL statement to answer the question. Copy and paste it into the SQL field:
 
 ```sql
-WITH filtered_flights AS (
-  SELECT
-    *
-  FROM
-    `dbsql_demo_pearl_ubaru`.`airlinedata_pearl_ubaru`.`flights_silver_mv`
-  WHERE
-    `Origin` = 'BOS'
-    AND `IsDepDelayed` = 'YES'
-),
-filtered_flights_march_2007 AS (
-  SELECT
-    *
-  FROM
-    filtered_flights
-  WHERE
-    YEAR(`Date`) = 2007
-    AND MONTH(`Date`) = 3
-)
 SELECT
-  COUNT(*) as `DelayedFlights`
+  SUM(`nb_trip`) AS total_trips
 FROM
-  filtered_flights_march_2007
+  `main_hec_nov_2025`.`<your_schema>`.`taxi_daily_zone_summary`
+WHERE
+  `Borough` = 'Queens'
+  AND `pickup_date` = '2025-07-14';
 ```
 
 5. Click **Preview** to run the query and verify the expected result is **188 delayed flights** from Boston in March 2007.
-6. Once verified, you can add more variations of the same question that you believe people will ask, or you've heard them ask. For example: 
- > "How many flights departing from Boston experienced delays during March 2007?"
- > "What was the number of delayed flights originating in Boston in March 2007?"
- > "In March 2007, how many flights leaving Boston were delayed?"
- > "How many Boston departures were delayed in March 2007?"
+6. Once verified, you can add more variations of the same question that you believe people will ask, or you've heard them ask.   
 
-Don't forget to use the same sql code above as your ground truth. 
-
-7. Now, click **Run Benchmark** to test Genie’s response against the correct answer. If Genie’s output matches your ground truth result (188), the benchmark score will be marked **100% accurate**.
+7. Now, click **Run Benchmark** to test Genie’s response against the correct answer. If Genie’s output matches your ground truth result (15 403), the benchmark score will be marked **100% accurate**.
 
 Benchmarks are a great way to validate Genie’s ability to answer complex questions using multiple tables, ensuring reliability before sharing results with stakeholders.
 
