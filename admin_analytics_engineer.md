@@ -355,12 +355,11 @@ CREATE OR REFRESH MATERIALIZED VIEW taxi_silver_mv
   congestion_surcharge double,
   Airport_fee double,
   cbd_congestion_fee double,
-  _rescued_data string,
+  _rescued_data string
+) 
+TBLPROPERTIES ('delta.feature.timestampNtz' = 'supported')
 
-
-   FOREIGN KEY (PULocationID) REFERENCES taxi_lookup_zones(LocationID),
-   FOREIGN KEY (DOLocationID) REFERENCES taxi_lookup_zones(LocationID)
-) AS
+AS
 select * from taxi_bronze_dbsql;
 ```
 
