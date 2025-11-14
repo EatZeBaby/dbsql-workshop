@@ -333,6 +333,38 @@ In this step, we’ll create views for the **Silver** and **Gold** layers of the
 3. **Paste the following SQL** and make sure the catalog and schema selector are the catalog and schema that you created
 
 ```sql
+CREATE OR REFRESH MATERIALIZED VIEW taxi_silver_mv
+( 
+  VendorId int,
+  tpep_pickup_datetime Timestamp_NTZ,
+  tpep_dropoff_datetime Timestamp_NTZ,
+  passenger_count bigint,
+  trip_distance double,
+  RatecodeID bigint,
+  store_and_fwd_flag string,
+  PULocationID int,
+  DOLocationID int,
+  payment_type bigint,
+  fare_amount double,
+  extra double,
+  mta_tax double,
+  tip_amount double,
+  tolls_amount double,
+  improvement_surcharge double,
+  total_amount double,
+  congestion_surcharge double,
+  Airport_fee double,
+  cbd_congestion_fee double,
+  _rescued_data string,
+
+
+   FOREIGN KEY (PULocationID) REFERENCES taxi_lookup_zones(LocationID),
+   FOREIGN KEY (DOLocationID) REFERENCES taxi_lookup_zones(LocationID)
+) AS
+select * from taxi_bronze_dbsql;
+```
+
+```sql
 CREATE OR REPLACE MATERIALIZED VIEW taxi_daily_zone_summary
 AS
 SELECT to_date(tpep_pickup_datetime) as pickup_date
@@ -464,6 +496,69 @@ We’ll focus on how to grant and manage permissions for the following asset typ
 6. Click **Revoke** if you want to remove access
 
 Setting appropriate access controls is critical to managing security, compliance, and data visibility across your organization. Now you're sure your assets are governed and accessible to the right people.
+
+# Bonus : ai_query 
+```sql
+
+
+
+SELECT  ai_query(
+  'databricks-llama-4-maverick',
+ 'what is this image about?', files => content)
+as output 
+from main_hec_nov_2025.francis_laurens_fsi_smart_claims.accident_images 
+where image_name = '4_High.jpg'
+limit 1
+
+```
+
+![Hello World](https://hls-eng-data-public.s3.amazonaws.com/img/accident_images/4_High.png)
+
+Response from ai_query should be similar to :
+```
+The image depicts a car accident scene, with two vehicles involved. The focus is on the front ends of the cars, which are severely damaged. 
+
+* **Damaged Cars:** 
+* The car on the left has a silver body and is badly damaged, with its front end crushed and twisted. 
+* The car on the right is also silver and has significant damage to its front end, including a broken headlight and a dented hood. 
+
+* **Background:** 
+* In the background, there are other cars visible, some of which appear to be damaged as well. 
+* Trees and vegetation can be seen behind the cars, suggesting that the accident occurred in a wooded or suburban area. 
+
+* **Overall Scene:** 
+* The image conveys a sense of destruction and chaos, highlighting the severity of the collision. 
+* The presence of multiple damaged cars in the background implies that the accident may have been more complex than a simple two-vehicle collision. In summary, the image shows a serious car accident involving at least two vehicles, with significant damage to the front ends of the cars. The scene suggests a potentially complex accident with multiple vehicles involved.
+```
+
+You can play with other AI Functions :
+
+For example, add a classification of the degree of the accident.
+
+``` sql
+SELECT  ai_query(
+  'databricks-llama-4-maverick',
+ 'what is this image about?', files => content)
+as output , ai_classify(output, ARRAY("no damage","soft damage","car is dead sorry"))
+from main_hec_nov_2025.francis_laurens_fsi_smart_claims.accident_images 
+where image_name = '4_High.jpg'
+limit 1
+```
+
+| Function Name | Description |
+| :--- | :--- |
+| `ai_analyze_sentiment` | Perform **sentiment analysis** on input text using a state-of-the-art generative AI model. |
+| `ai_classify` | **Classify** input text according to labels you provide using a state-of-the-art generative AI model. |
+| `ai_extract` | **Extract entities** specified by labels from text using a state-of-the-art generative AI model. |
+| `ai_fix_grammar` | **Correct grammatical errors** in text using a state-of-the-art generative AI model. |
+| `ai_gen` | Answer the user-provided prompt using a state-of-the-art generative AI model. |
+| `ai_mask` | **Mask specified entities** in text using a state-of-the-art generative AI model. |
+| `ai_parse_document` | **Extract structured content** from unstructured documents using a state-of-the-art generative AI model. |
+| `ai_similarity` | Compare two strings and compute the **semantic similarity score** using a state-of-the-art generative AI model. |
+| `ai_summarize` | Generate a **summary** of text using SQL and a state-of-the-art generative AI model. |
+| `ai_translate` | **Translate** text to a specified target language using a state-of-the-art generative AI model. |
+| `ai_forecast` | **Forecast data** up to a specified horizon. This table-valued function is designed to extrapolate time series data into the future. |
+| `vector_search` | **Search and query** a Mosaic AI Vector Search index using a state-of-the-art generative AI model. |
 
 ## Conclusion
 

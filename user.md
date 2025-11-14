@@ -7,7 +7,7 @@ This workshop guide is broken up into **two major sections**:
 
 In this portion of the lab, we will focus on the **User POV** which is the perspective of users who work with data to build dashboards, run queries, and gain insights using Databricks SQL.
 
-We’ll be using a sample dataset containing airline and airport information to complete the exercises.
+We’ll be using the taxi datasets from yesterday  to complete the exercises.
 
 Here’s what we’ll cover in the User POV:
 
@@ -292,7 +292,7 @@ WHERE
   AND `pickup_date` = '2025-07-14';
 ```
 
-5. Click **Preview** to run the query and verify the expected result is **188 delayed flights** from Boston in March 2007.
+5. Click **Preview** to run the query and verify the expected result is **15 403 trips** in the Queens on July 14th 2025.
 6. Once verified, you can add more variations of the same question that you believe people will ask, or you've heard them ask.   
 
 7. Now, click **Run Benchmark** to test Genie’s response against the correct answer. If Genie’s output matches your ground truth result (15 403), the benchmark score will be marked **100% accurate**.

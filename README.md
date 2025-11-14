@@ -25,33 +25,9 @@ This workshop guide is broken up into 2 major sections:
 * Step 6: Evaluating AI/BI Genie
 * Step 7: View the Entity Relationship Diagram (ERD)
 * Step 8: View Data Lineage
-
-# 🚀 Prerequisites
-No prior data warehousing, analytics or governance experience required! This tutorial is designed for developers who want to learn data & AI fundamentals.
-
-1. Free Databricks Account
-Sign up at databricks.com/learn/free-edition
-No credit card required, free forever
-Includes Apache Spark, Delta Lake, and Unity Catalog
-15GB storage with community support
-
-2. Sample Data (Provided)
-Use our airports.csv, lookupcodes.csv and flights.csv (Note: Flights CSV was such a large file it had to be placed in the release notes)
-
-# 🛠️ Quick Start
-Get up and running in 10 minutes:
-
-* Sign up for free account
-* Create new workspace
-* Download the Required Files
-
-From this repository, download:
-* Airports CSV File
-* Lookupcodes CSV File
-* Flights CSV File (can be found in the release notes)
-
+ 
+ 
 Follow step-by-step instructions in the admin.md file and then the user.md file
 
 Build your first data lakehouse!
-
-<img width="1087" height="612" alt="Image" src="https://github.com/user-attachments/assets/613e7078-870b-454e-95a6-d69df10673c1" />
+ 
